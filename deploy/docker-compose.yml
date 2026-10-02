@@ -1,68 +1,15 @@
 version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
-    container_name: hermess-db
-    restart: always
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: Admin_Hermes_2024
       POSTGRES_DB: hermess
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - hermess-net
-
   backend:
-    build: 
-      context: ../backend
-    container_name: hermess-backend
-    restart: always
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://admin:Admin_Hermes_2024@db:5432/hermess
-      - NTD_BASE_PATH=/app/ntd_base
-      - OLLAMA_HOST=http://ollama:11434
-    volumes:
-      - ../ntd_base:/app/ntd_base:ro
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - hermess-net
-
+    build: ../backend
+    ports: ["8000:8000"]
+    volumes: ["../ntd_base:/app/ntd_base"]
   frontend:
-    build: 
-      context: ../frontend
-    container_name: hermess-frontend
-    restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    networks:
-      - hermess-net
-
-  ollama:
-    image: ollama/ollama:latest
-    container_name: hermess-ollama
-    restart: always
-    volumes:
-      - ollama_data:/root/.ollama
-    networks:
-      - hermess-net
-
-volumes:
-  postgres_data:
-  ollama_data:
-
-networks:
-  hermess-net:
-    driver: bridge
+    build: ../frontend
+    ports: ["3000:3000"]
