@@ -7,9 +7,9 @@ services:
       POSTGRES_PASSWORD: Admin_Hermes_2024
       POSTGRES_DB: hermess
   backend:
-    build: ../backend
+    build: ./backend
     ports: ["8000:8000"]
-    volumes: ["../ntd_base:/app/ntd_base"]
+    volumes: ["./ntd_base:/app/ntd_base"]
   frontend:
-    build: ../frontend
+    build: ./frontend
     ports: ["3000:3000"]
