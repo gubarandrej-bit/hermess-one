@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import uvicorn
 import os
 import tempfile
@@ -57,13 +58,13 @@ async def analyze(files: List[UploadFile] = File(...)):
             with open(p, "wb") as wf: wf.write(await f.read())
             saved.append(p)
         
-        # Simple pipeline
-        journal = parser.extract_tables(saved[0]) if len(saved) > 0 else None
-        spec = parser.extract_tables(saved[1]) if len(saved) > 1 else None
+        if len(saved) < 2:
+            raise HTTPException(status_code=400, detail="Загрузите минимум два файла")
+
+        journal = parser.extract_tables(saved[0])
+        spec = parser.extract_tables(saved[1])
         
-        findings = []
-        if journal is not None and spec is not None:
-            findings = verifier.verify_cables(journal, spec)
+        findings = verifier.verify_cables(journal, spec)
         
         return {"status": "completed", "findings": findings, "summary": {"total": len(findings)}}
     finally:
